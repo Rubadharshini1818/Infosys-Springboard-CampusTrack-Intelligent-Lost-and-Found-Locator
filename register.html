@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Student Registration</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+<script>
+tailwind.config = {
+    darkMode: "class",
+    theme: {
+        extend: {
+            colors: {
+                "primary": "#2bee4b",
+                "background-light": "#f6f8f6",
+                "background-dark": "#102213",
+            },
+            fontFamily: {
+                "display": ["Lexend", "sans-serif"]
+            }
+        }
+    }
+}
+</script>
+
+<style>
+.password-toggle-icon {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #4c9a59;
+}
+</style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark font-display text-[#0d1b10]">
+
+<script>
+/* -------------------------------------------------
+    FINAL REGISTRATION FUNCTION (WORKING 100%)
+--------------------------------------------------*/
+let registeredUsers = JSON.parse(localStorage.getItem("users")) || [];
+
+function registerUser(event) {
+    event.preventDefault();
+
+    const name = document.getElementById("reg_name").value.trim();
+    const email = document.getElementById("reg_email").value.trim();
+    const password = document.getElementById("reg_pass").value.trim();
+    const confirmPassword = document.getElementById("reg_confirm").value.trim();
+    const role = document.getElementById("role").value.trim();
+    const userId = document.getElementById("userId").value.trim();
+
+    // Role validation
+    if (!role) {
+        document.getElementById("roleError").classList.remove("hidden");
+        return;
+    }
+
+    // ID validation
+    if (!userId) {
+        document.getElementById("idError").classList.remove("hidden");
+        return;
+    }
+
+    // Check duplicate email
+    if (registeredUsers.some(u => u.email === email)) {
+        alert("This email is already registered!");
+        return;
+    }
+
+    // password match
+    if (password !== confirmPassword) {
+        alert("Passwords do not match!");
+        return;
+    }
+
+    // Save full user object INCLUDING NAME
+    registeredUsers.push({
+        name,
+        email,
+        password,
+        role,
+        userId
+    });
+
+    localStorage.setItem("users", JSON.stringify(registeredUsers));
+
+    alert("Registration Successful!");
+    window.location.href = "login.html";
+}
+</script>
+
+<div class="relative flex min-h-screen w-full flex-col items-center justify-center p-4">
+
+<header class="absolute top-0 left-0 right-0 p-6 sm:px-10 lg:px-20">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3 text-[#0d1b10] dark:text-white">
+<h2 class="text-lg font-bold">Campus Lost &amp; Found</h2>
+</div>
+
+<a href="login.html"
+class="flex min-w-[84px] items-center justify-center rounded-lg h-10 px-4 bg-primary/20 text-[#0d1b10] text-sm font-bold">
+Sign In
+</a>
+</div>
+</header>
+
+<main class="w-full max-w-lg mx-auto py-16">
+<div class="flex flex-col items-center text-center">
+
+<p class="text-4xl font-black text-[#0d1b10]">Create Your Account</p>
+<p class="text-base text-[#4c9a59] mt-2">Join the campus portal</p>
+
+<form class="w-full text-left space-y-6 mt-8" onsubmit="registerUser(event)">
+
+<!-- NAME -->
+<div>
+<label class="flex flex-col">
+<p class="text-base font-medium pb-2">Full Name</p>
+<input id="reg_name" type="text" placeholder="Enter your full name"
+class="form-input w-full rounded-lg border h-14 p-[15px]" required />
+</label>
+</div>
+
+<!-- EMAIL -->
+<div>
+<label class="flex flex-col">
+<p class="text-base font-medium pb-2">Email</p>
+<input id="reg_email" type="email" placeholder="Enter your email"
+class="form-input w-full rounded-lg border h-14 p-[15px]" required />
+</label>
+</div>
+
+<!-- PASSWORD -->
+<div>
+<label class="flex flex-col">
+<p class="text-base font-medium pb-2">Password</p>
+<div class="relative">
+<input id="reg_pass" type="password" placeholder="Enter your password"
+class="form-input w-full rounded-lg border h-14 p-[15px] pr-12" required />
+<span class="material-symbols-outlined password-toggle-icon">visibility_off</span>
+</div>
+</label>
+</div>
+
+<!-- CONFIRM PASSWORD -->
+<div>
+<label class="flex flex-col">
+<p class="text-base font-medium pb-2">Confirm Password</p>
+<div class="relative">
+<input id="reg_confirm" type="password" placeholder="Confirm your password"
+class="form-input w-full rounded-lg border h-14 p-[15px] pr-12" required />
+<span class="material-symbols-outlined password-toggle-icon">visibility_off</span>
+</div>
+</label>
+</div>
+
+<!-- ROLE -->
+<div>
+<label class="flex flex-col">
+<p class="text-base font-medium pb-2">Select Role</p>
+<select id="role"
+class="form-input w-full rounded-lg border h-14 p-[15px] bg-background-light">
+<option value="">-- Select Role --</option>
+<option value="Student">Student</option>
+<option value="Staff">Staff</option>
+<option value="Worker">Worker</option>
+</select>
+</label>
+<p id="roleError" class="text-red-600 text-sm hidden">Role is required</p>
+</div>
+
+<!-- ID -->
+<div>
+<label class="flex flex-col">
+<p class="text-base font-medium pb-2">Your ID</p>
+<input id="userId" type="text" placeholder="Enter your ID"
+class="form-input w-full rounded-lg border h-14 p-[15px]" />
+</label>
+<p id="idError" class="text-red-600 text-sm hidden">ID is required</p>
+</div>
+
+<button class="w-full h-14 rounded-lg bg-primary font-bold text-[#0d1b10]">
+Create Account
+</button>
+
+</form>
+</div>
+</main>
+
+</div>
+</body>
+</html>

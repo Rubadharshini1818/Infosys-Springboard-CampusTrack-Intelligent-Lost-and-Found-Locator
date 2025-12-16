@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Item Match Results</title>
+
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+<style>
+.material-symbols-outlined {
+ font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+ font-size: 20px;
+}
+</style>
+
+</head>
+<body class="bg-background-light font-display">
+
+<!-- ========================= HEADER ========================= -->
+<header class="sticky top-0 z-10 flex items-center justify-between border-b border-slate-300 px-6 py-3 bg-white/80 backdrop-blur-md">
+
+  <div class="flex items-center gap-3">
+      <div class="size-6 text-primary">
+          <svg viewBox="0 0 48 48" fill="currentColor">
+              <path d="M42.4 44S36 33.9 41.1 24C46.8 12.9 42.2 4 42.2 4H7S11.7 12.9 6 24C.9 33.9 7.3 44 7.3 44H42.4Z"/>
+          </svg>
+      </div>
+      <h2 class="text-lg font-bold">Campus Lost & Found</h2>
+  </div>
+
+  <div class="flex items-center gap-6">
+      <a id="goHome" class="cursor-pointer hover:text-primary font-medium">Home</a>
+      <a id="goReport" class="cursor-pointer hover:text-primary font-medium">Report an Item</a>
+      <a class="font-medium text-primary">Matches</a>
+  </div>
+
+</header>
+
+
+<!-- ========================= MAIN ========================= -->
+<main class="max-w-6xl mx-auto p-6">
+
+    <h1 class="text-4xl font-black mb-2">Your Item Matches</h1>
+    <p class="text-slate-600 mb-6">We compared all LOST items with FOUND items and listed the top matches.</p>
+
+    <!-- Sorting buttons -->
+    <div class="flex gap-3 mb-8">
+        <button id="sortConfidence" class="flex items-center gap-2 px-4 py-2 bg-primary/20 rounded-lg">
+            Sort by: Match Confidence <span class="material-symbols-outlined">expand_more</span>
+        </button>
+
+        <button id="sortDate" class="flex items-center gap-2 px-4 py-2 bg-slate-200 rounded-lg">
+            Sort by: Date <span class="material-symbols-outlined">expand_more</span>
+        </button>
+    </div>
+
+    <div id="matchContainer" class="flex flex-col gap-10"></div>
+
+</main>
+
+
+<script>
+/* =====================================================
+      LOAD POSTS
+===================================================== */
+let posts = JSON.parse(localStorage.getItem("posts")) || [];
+
+// split to lost / found
+let lostItems = posts.filter(p => p.type === "LOST");
+let foundItems = posts.filter(p => p.type === "FOUND");
+
+
+/* =====================================================
+      MATCHING LOGIC
+===================================================== */
+function getMatchScore(lost, found) {
+    let score = 0;
+
+    if (lost.category && found.category && lost.category.toLowerCase() === found.category.toLowerCase())
+        score += 40;
+
+    if (lost.zone && found.zone && lost.zone.toLowerCase() === found.zone.toLowerCase())
+        score += 30;
+
+    if (lost.itemName && found.itemName) {
+        let L = lost.itemName.toLowerCase();
+        let F = found.itemName.toLowerCase();
+        if (L.includes(F) || F.includes(L)) score += 30;
+    }
+
+    return score;
+}
+
+
+/* =====================================================
+      BUILD MATCHES FOR ALL LOST ITEMS
+===================================================== */
+let matchPairs = [];
+
+lostItems.forEach(lost => {
+    let matches = [];
+
+    foundItems.forEach(found => {
+        let score = getMatchScore(lost, found);
+        if (score > 0) {
+            matches.push({
+                lost,
+                found,
+                score
+            });
+        }
+    });
+
+    matches.sort((a, b) => b.score - a.score);
+    matchPairs.push(...matches);
+});
+
+
+/* =====================================================
+      SORTING
+===================================================== */
+document.getElementById("sortConfidence").onclick = () => {
+    matchPairs.sort((a, b) => b.score - a.score);
+    renderMatches();
+};
+
+document.getElementById("sortDate").onclick = () => {
+    matchPairs.sort((a, b) => new Date(b.found.date) - new Date(a.found.date));
+    renderMatches();
+};
+
+
+/* =====================================================
+      RENDER MATCHES
+===================================================== */
+function renderMatches() {
+    let container = document.getElementById("matchContainer");
+    container.innerHTML = "";
+
+    if (matchPairs.length === 0) {
+        container.innerHTML = `
+            <p class="text-center text-slate-500 text-lg">No matches found yet.</p>
+        `;
+        return;
+    }
+
+    matchPairs.forEach(pair => {
+        let lost = pair.lost;
+        let found = pair.found;
+
+        container.innerHTML += `
+        <div class="p-6 bg-white rounded-xl border shadow">
+            
+            <div class="flex justify-between mb-3">
+                <p class="font-medium text-slate-800">Match Confidence</p>
+                <p class="font-bold text-primary">${pair.score}%</p>
+            </div>
+
+            <div class="w-full bg-slate-200 rounded-full mb-4">
+                <div class="h-2 bg-primary rounded-full" style="width:${pair.score}%;"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- LOST ITEM -->
+                <div class="p-4 rounded-lg border bg-slate-50">
+                    <div class="aspect-video bg-center bg-cover rounded-lg mb-4"
+                        style="background-image:url('${lost.image || ""}')"></div>
+
+                    <p class="text-xs text-slate-500">Your Lost Item</p>
+                    <p class="text-lg font-bold">${lost.itemName}</p>
+                    <p class="text-sm mt-1 text-slate-600">${lost.description?.slice(0,120) || ""}...</p>
+                </div>
+
+                <!-- FOUND ITEM -->
+                <div class="p-4 rounded-lg border bg-slate-50">
+                    <div class="aspect-video bg-center bg-cover rounded-lg mb-4"
+                        style="background-image:url('${found.image || ""}')"></div>
+
+                    <p class="text-xs text-slate-500">Potential Match</p>
+                    <p class="text-lg font-bold">${found.itemName}</p>
+                    <p class="text-sm mt-1 text-slate-600">${found.description?.slice(0,120) || ""}...</p>
+                </div>
+
+            </div>
+
+            <div class="flex justify-end mt-4">
+                <button class="px-6 py-2 bg-primary rounded-lg font-bold flex items-center gap-2">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    This Is My Item!
+                </button>
+            </div>
+
+        </div>
+        `;
+    });
+}
+
+renderMatches();
+
+
+/* =====================================================
+      NAVIGATION
+===================================================== */
+
+document.getElementById("goHome").onclick = () => {
+    window.location.href = "dashboard.html";
+};
+
+document.getElementById("goReport").onclick = () => {
+    window.location.href = "report.html";
+};
+
+</script>
+</body>
+</html>

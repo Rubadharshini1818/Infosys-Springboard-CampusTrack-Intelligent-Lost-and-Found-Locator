@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Post Lost Item</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#2bee4b",
+          "background-light": "#f8fcf9",
+          "background-dark": "#102213",
+        },
+        fontFamily: {
+          "display": ["Lexend", "sans-serif"]
+        },
+      },
+    },
+  }
+</script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-text-primary-light">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+  <div class="layout-container flex h-full grow flex-col">
+    <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-[#e7f3e9] dark:border-[#2a3c2e] px-4 sm:px-10 py-3 w-full">
+
+  <div class="flex items-center gap-4 text-[#0d1b10] dark:text-[#f0f3f1]">
+      <div class="size-6 text-primary">
+          <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+              <path d="M42.4379 44C42.4379 44 36.0744 33.9038 41.1692 24C46.8624 12.9336 42.2078 4 42.2078 4L7.01134 4C7.01134 4 11.6577 12.932 5.96912 23.9969C0.876273 33.9029 7.27094 44 7.27094 44L42.4379 44Z" fill="currentColor"></path>
+          </svg>
+      </div>
+      <h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">Campus Lost & Found</h2>
+  </div>
+
+  <div class="flex items-center gap-6">
+
+      <!-- HOME BUTTON -->
+      <a href="dashboard.html"
+         class="text-[#0d1b10] dark:text-[#f0f3f1] text-sm font-medium leading-normal cursor-pointer">
+         Home
+      </a>
+
+      <!-- POST AN ITEM BUTTON -->
+      <button onclick="window.location.href='report.html'"
+              class="flex items-center justify-center rounded-lg h-10 px-4 bg-primary text-[#0d1b10] text-sm font-bold">
+          Post an Item
+      </button>
+
+      <!-- PROFILE ICON -->
+      <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
+           style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDkkeDTr6mXOiBoiLZfcE6ZGuWyrAOZwCjSt7J7lOXs0xSU0wtaRRS292Gg_SK8C7BtJ-SWtqAC7RHeAHo0ya33znSevDS_8p1fWrro-bhmJTOBCQZCFc8rkOYJyhmPjuzHUADtZc0a-WHTvnaKMRMY_ce4zV63HYGxYCkL74Xdp4e5jcTDGxf5N9kdO_uW5xQXuSSvtdXMaoHe_dG6YOFvuwPXs2GFR9okAUd7WCv3DObhYhph_ck2zpR3p6M_rjLmqosT9HQoVhY");'>
+      </div>
+  </div>
+
+</header>
+
+
+    <main class="px-4 sm:px-10 lg:px-20 xl:px-40 flex flex-1 justify-center py-10">
+      <div class="layout-content-container flex flex-col w-full max-w-[960px] flex-1">
+        <div class="flex flex-col gap-8">
+          <div class="flex flex-wrap justify-between gap-3 p-4">
+            <div class="flex min-w-72 flex-col gap-3">
+              <h1 id="formTitle" class="text-[#0d1b10] dark:text-[#f0f3f1] text-4xl font-black leading-tight tracking-[-0.033em]">Report a Lost Item</h1>
+              <p class="text-[#4c9a59] dark:text-[#97b49d] text-base font-normal leading-normal">Please provide as much detail as possible to help us find your item.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 p-4">
+
+            <div class="lg:col-span-2 flex flex-col gap-6">
+              <label class="flex flex-col min-w-40 flex-1">
+                <p class="text-[#0d1b10] dark:text-[#f0f3f1] text-base font-medium leading-normal pb-2">Item Name</p>
+                <input id="itemName" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0d1b10] dark:text-[#f0f3f1] focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#cfe7d3] dark:border-[#2a3c2e] bg-background-light dark:bg-background-dark h-14 placeholder:text-[#4c9a59] dark:placeholder:text-[#97b49d] p-[15px] text-base font-normal leading-normal" placeholder="e.g., Black Hydro Flask water bottle" />
+              </label>
+
+              <label class="flex flex-col min-w-40 flex-1">
+                <p class="text-[#0d1b10] dark:text-[#f0f3f1] text-base font-medium leading-normal pb-2">Detailed Description</p>
+                <textarea id="description" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0d1b10] dark:text-[#f0f3f1] focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#cfe7d3] dark:border-[#2a3c2e] bg-background-light dark:bg-background-dark min-h-36 placeholder:text-[#4c9a59] dark:placeholder:text-[#97b49d] p-[15px] text-base font-normal leading-normal" placeholder="Provide details like brand, color, size, or any identifying marks."></textarea>
+              </label>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <label class="flex flex-col min-w-40 flex-1">
+                  <p class="text-[#0d1b10] dark:text-[#f0f3f1] text-base font-medium leading-normal pb-2">Date</p>
+                  <input id="dateLost" type="date" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg border border-[#cfe7d3] h-14 p-[15px]" />
+                </label>
+
+                <label class="flex flex-col min-w-40 flex-1">
+                  <p class="text-[#0d1b10] dark:text-[#f0f3f1] text-base font-medium leading-normal pb-2">Location</p>
+                  <input id="locationLost" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg border border-[#cfe7d3] h-14 p-[15px]" placeholder="e.g., Main Library, 2nd Floor" />
+                </label>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <label class="flex flex-col">
+                  <p class="text-[#0d1b10] dark:text-[#f0f3f1] text-base font-medium pb-2">Category</p>
+                  <input id="categoryInput" class="form-input rounded-lg border border-[#cfe7d3] h-12 p-[15px]" placeholder="Electronics / Book / Clothing" />
+                </label>
+
+                <label class="flex flex-col">
+                  <p class="text-[#0d1b10] dark:text-[#f0f3f1] text-base font-medium pb-2">Campus Zone</p>
+                  <input id="zoneInput" class="form-input rounded-lg border border-[#cfe7d3] h-12 p-[15px]" placeholder="Library / North Block / Canteen" />
+                </label>
+              </div>
+
+              <!-- Type selector -->
+              <div class="flex items-center gap-4">
+                <label class="flex items-center gap-2"><input type="radio" name="postType" value="LOST" checked> Lost</label>
+                <label class="flex items-center gap-2"><input type="radio" name="postType" value="FOUND"> Found</label>
+              </div>
+
+            </div>
+
+            <div class="lg:col-span-1 flex flex-col gap-2">
+              <p class="text-[#0d1b10] dark:text-[#f0f3f1] text-base font-medium leading-normal">Upload an Image (Optional)</p>
+
+              <div id="dropBox" class="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-[#cfe7d3] dark:border-[#2a3c2e] rounded-lg bg-primary/10 dark:bg-primary/20 text-center p-4">
+                <span class="material-symbols-outlined text-4xl text-[#4c9a59]">upload_file</span>
+                <p class="mt-2 text-[#0d1b10] text-sm font-medium">Drag &amp; drop files here</p>
+                <p class="text-xs text-[#4c9a59]">or</p>
+                <button id="browseBtn" class="mt-2 text-sm font-bold text-[#0d1b10] bg-white border px-4 py-2 rounded-lg">Browse Files</button>
+                <input type="file" id="hiddenPhotoInput" hidden accept="image/*">
+                <img id="previewImage" class="hidden mt-2 w-32 h-32 object-cover rounded-lg" alt="preview">
+              </div>
+
+              <p class="text-xs text-[#4c9a59] dark:text-[#97b49d] mt-1">Maximum file size: 5MB. Supported formats: JPG, PNG, GIF.</p>
+            </div>
+
+          </div>
+
+          <div class="flex justify-end items-center gap-4 p-4 border-t border-[#e7f3e9] dark:border-[#2a3c2e] mt-4">
+            <button id="cancelBtn" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-transparent text-[#0d1b10] dark:text-[#f0f3f1] text-sm font-bold leading-normal tracking-[0.015em] hover:bg-black/5 dark:hover:bg-white/10">
+              <span class="truncate">Cancel</span>
+            </button>
+            <button id="submitBtn" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-[#0d1b10] text-base font-bold leading-normal tracking-[0.015em] hover:opacity-90">
+              <span class="truncate">Submit Post</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+/* ============================
+   Report page script (create + edit)
+   ============================ */
+const currentUser = JSON.parse(localStorage.getItem("currentUser")) || { email: "guest@campus.local", avatar: "" };
+let posts = JSON.parse(localStorage.getItem("posts")) || [];
+
+const itemName = document.getElementById("itemName");
+const description = document.getElementById("description");
+const dateLost = document.getElementById("dateLost");
+const locationLost = document.getElementById("locationLost");
+const categoryInput = document.getElementById("categoryInput");
+const zoneInput = document.getElementById("zoneInput");
+const hiddenPhotoInput = document.getElementById("hiddenPhotoInput");
+const previewImage = document.getElementById("previewImage");
+const dropBox = document.getElementById("dropBox");
+const browseBtn = document.getElementById("browseBtn");
+const submitBtn = document.getElementById("submitBtn");
+const cancelBtn = document.getElementById("cancelBtn");
+const formTitle = document.getElementById("formTitle");
+
+let editing = false;
+let editIndex = null;
+
+/* If user came from Edit button, sessionStorage.editPostIndex will have index */
+const maybeEditIndex = sessionStorage.getItem("editPostIndex");
+if (maybeEditIndex !== null && maybeEditIndex !== undefined) {
+  editIndex = parseInt(maybeEditIndex, 10);
+  if (!isNaN(editIndex) && posts[editIndex]) {
+    editing = true;
+    loadPostToForm(posts[editIndex]);
+    formTitle.textContent = "Edit Item";
+    // set edit flag in URL optional
+    history.replaceState(null, "", "report.html?edit=1");
+  } else {
+    // invalid index — clear session
+    sessionStorage.removeItem("editPostIndex");
+  }
+}
+
+/* If URL has type param (type=FOUND or LOST) use it to set radio default */
+const urlParams = new URLSearchParams(window.location.search);
+const forcedType = urlParams.get("type");
+if (forcedType) {
+  const r = document.querySelector(`input[name="postType"][value="${forcedType.toUpperCase()}"]`);
+  if (r) r.checked = true;
+}
+
+/* Drag & drop + browse */
+browseBtn.addEventListener("click", () => hiddenPhotoInput.click());
+
+hiddenPhotoInput.addEventListener("change", previewImageFile);
+
+dropBox.addEventListener("dragover", (e) => { e.preventDefault(); dropBox.classList.add("opacity-80"); });
+dropBox.addEventListener("dragleave", () => { dropBox.classList.remove("opacity-80"); });
+dropBox.addEventListener("drop", (e) => {
+  e.preventDefault(); dropBox.classList.remove("opacity-80");
+  const file = e.dataTransfer.files[0];
+  if (file) handleFile(file);
+});
+
+function previewImageFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  handleFile(file);
+}
+
+function handleFile(file) {
+  if (!file.type.startsWith("image/")) { alert("Please choose an image file."); return; }
+  if (file.size > 5 * 1024 * 1024) { alert("File too large. Max 5MB."); return; }
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    previewImage.src = ev.target.result;
+    previewImage.classList.remove("hidden");
+  };
+  reader.readAsDataURL(file);
+}
+
+/* Load existing post values into form */
+function loadPostToForm(p) {
+  itemName.value = p.itemName || "";
+  description.value = p.description || "";
+  dateLost.value = p.date || "";
+  locationLost.value = p.location || "";
+  categoryInput.value = p.category || "";
+  zoneInput.value = p.zone || "";
+  if (p.image) {
+    previewImage.src = p.image;
+    previewImage.classList.remove("hidden");
+  }
+  const typeRadio = document.querySelector(`input[name="postType"][value="${(p.type||"LOST").toUpperCase()}"]`);
+  if (typeRadio) typeRadio.checked = true;
+}
+
+/* Cancel: go back to viewposts */
+cancelBtn.addEventListener("click", () => {
+  // clear edit index when cancel
+  sessionStorage.removeItem("editPostIndex");
+  window.location.href = "viewposts.html";
+});
+
+/* Submit handler: create or update */
+submitBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  const name = itemName.value.trim();
+  const desc = description.value.trim();
+  const date = dateLost.value;
+  const loc = locationLost.value.trim();
+  const cat = categoryInput.value.trim();
+  const zone = zoneInput.value.trim();
+  const img = previewImage.src && !previewImage.classList.contains("hidden") ? previewImage.src : "";
+  const type = (document.querySelector('input[name="postType"]:checked')?.value || "LOST").toUpperCase();
+
+  // Basic validation
+  if (!name) { alert("Please enter item name."); return; }
+  if (!date) { alert("Please select a date."); return; }
+  if (!loc) { alert("Please enter location."); return; }
+
+  const newPost = {
+    itemName: name,
+    description: desc,
+    date: date,
+    location: loc,
+    category: cat || "",
+    zone: zone || "",
+    image: img,
+    user: currentUser.email || "guest@campus.local",
+    type: type,
+    time: new Date().toLocaleString()
+  };
+
+  if (editing && editIndex !== null && !isNaN(editIndex) && posts[editIndex]) {
+    // update existing
+    posts[editIndex] = newPost;
+    localStorage.setItem("posts", JSON.stringify(posts));
+    sessionStorage.removeItem("editPostIndex");
+    alert("Post updated successfully.");
+  } else {
+    // append new
+    posts.push(newPost);
+    localStorage.setItem("posts", JSON.stringify(posts));
+    alert("Post submitted successfully.");
+  }
+
+  // after submit return to view posts
+  window.location.href = "posts.html";
+
+});
+let flagged = JSON.parse(localStorage.getItem("flaggedPosts")) || [];
+
+flagged.push({
+    itemName: post.itemName,
+    reportedBy: currentUser.username,
+    date: new Date().toISOString().slice(0,10),
+    reason: selectedReason,
+    status: "pending",
+    postId: post.time
+});
+
+localStorage.setItem("flaggedPosts", JSON.stringify(flagged));
+
+
+</script>
+</body>
+</html>

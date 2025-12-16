@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Student Login</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#2bee4b",
+            "background-light": "#f6f8f6",
+            "background-dark": "#102213",
+          },
+          fontFamily: {
+            "display": ["Lexend", "sans-serif"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+</script>
+
+<style>
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;
+}
+</style>
+
+<!-- LOGIN SCRIPT -->
+<script>
+function togglePassword() {
+  const passInput = document.getElementById("loginPassword");
+  passInput.type = passInput.type === "password" ? "text" : "password";
+}
+
+function loginUser(event) {
+  event.preventDefault();
+
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value.trim();
+  const errorBox = document.getElementById("loginError");
+
+  let users = JSON.parse(localStorage.getItem("users")) || [];
+
+  const user = users.find(u => u.email === email);
+
+  if (!user) {
+    errorBox.textContent = "This email is not registered!";
+    errorBox.classList.remove("hidden");
+    return;
+  }
+
+  if (user.password !== password) {
+    errorBox.textContent = "Incorrect password!";
+    errorBox.classList.remove("hidden");
+    return;
+  }
+
+  localStorage.setItem("currentUser", JSON.stringify(user));
+  alert("Login successful!");
+  window.location.href = "dashboard.html";
+}
+</script>
+</head>
+
+<body class="font-display">
+<div class="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<div class="flex flex-1 justify-center">
+<div class="layout-content-container flex flex-col max-w-[1280px] flex-1">
+<main class="flex w-full flex-1">
+<div class="grid w-full grid-cols-1 md:grid-cols-2">
+<div class="hidden md:flex flex-col">
+<div class="flex w-full grow bg-background-light dark:bg-background-dark p-4">
+<div class="w-full gap-1 overflow-hidden bg-background-light dark:bg-background-dark aspect-[2/3] rounded-lg flex">
+<div class="w-full bg-center bg-no-repeat bg-cover aspect-auto rounded-none flex-1" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD59sJhwZKYk-hMVGzzoPhBpdSXFBAcLVhnfxUEPeMK1ly5t9BrN_9UwOEk9szwPRAlFWcIEcvr7GrgFhpECzTpK0I4gFcYBkra5cO1FiRAbOcgJMEI2tssN3AauWaHzh19bO5ewbn7KkKDORLpm5X-sji78dbEBqe6Hir7wTipYyhC-om-4R8wLq_rKqhQVaIzgd7p9Ch3htVyBYSeAgkkQd8PXMj10LJrseAhai5wFUflKVBWX8IZjhTUrGgcrnzpvoxiweeErwQ');"></div>
+</div>
+</div>
+</div>
+
+<div class="flex flex-col items-center justify-center p-6 sm:p-12">
+<div class="flex w-full max-w-md flex-col gap-8">
+
+<div class="flex flex-col items-start gap-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-3xl text-primary">hub</span>
+<p class="text-xl font-bold text-gray-800 dark:text-gray-200">Campus Lost &amp; Found</p>
+</div>
+</div>
+
+<form onsubmit="loginUser(event)" class="flex flex-col gap-6">
+
+<div class="flex min-w-72 flex-col gap-2">
+<p class="text-gray-900 dark:text-gray-100 text-3xl font-black leading-tight tracking-[-0.033em]">Welcome Back</p>
+<p class="text-gray-600 dark:text-gray-400 text-base font-normal leading-normal">Log in to the Campus Lost &amp; Found portal.</p>
+</div>
+
+<label class="flex flex-col flex-1">
+<p class="text-gray-800 dark:text-gray-200 text-sm font-medium leading-normal pb-2">Email</p>
+<input id="loginEmail"
+ class="form-input flex w-full rounded-lg text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 h-12 p-[15px]"
+ placeholder="Enter your email" type="email" required />
+</label>
+
+<label class="flex flex-col flex-1">
+<p class="text-gray-800 dark:text-gray-200 text-sm font-medium leading-normal pb-2">Password</p>
+<div class="flex w-full items-stretch rounded-lg">
+<input id="loginPassword"
+ class="form-input flex w-full rounded-lg rounded-r-none border border-gray-300 dark:border-gray-700 h-12 p-[15px] pr-2"
+ placeholder="Enter your password" type="password" required />
+
+<button type="button" onclick="togglePassword()" class="flex items-center justify-center px-3 border border-gray-300 dark:border-gray-700 rounded-r-lg">
+<span class="material-symbols-outlined text-xl">visibility</span>
+</button>
+</div>
+</label>
+
+<p id="loginError" class="text-red-600 text-sm hidden"></p>
+
+<button type="submit"
+ class="flex items-center justify-center rounded-lg h-12 px-6 bg-primary text-gray-900 text-base font-bold hover:bg-primary/90">
+Login
+</button>
+
+<p class="text-center text-sm font-normal text-gray-600 dark:text-gray-400">
+Don't have an account?
+<a class="font-bold underline text-primary hover:text-primary/90" href="register.html">Register</a>
+</p>
+
+</form>
+
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</div>
+</div>
+</body></html>

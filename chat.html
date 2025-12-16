@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Campus Lost&Found — Chat</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#2bee4b",
+            "background-light": "#f6f8f6",
+            "background-dark": "#102213",
+          },
+          fontFamily: { "display": ["Lexend", "sans-serif"] }
+        }
+      }
+    }
+  </script>
+  <style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    /* Avatar letter styling */
+    .avatar-letter {
+      display: inline-grid;
+      place-items: center;
+      color: white;
+      font-weight: 700;
+    }
+    /* message bubbles */
+    .bubble-sent { background: rgb(34 197 94 / 12%); border: 1px solid rgba(34,197,94,0.18); }
+    .bubble-recv { background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04); }
+  </style>
+</head>
+<body class="bg-background-light font-display text-[#0d1b10]">
+
+<!-- Layout: left sidebar (users + item info), right chat -->
+<div class="flex h-screen">
+  <!-- Sidebar -->
+  <aside class="w-[320px] flex-shrink-0 border-r border-[#e7f3e9] bg-white p-6 flex flex-col">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="text-primary">
+        <svg class="w-8 h-8" viewBox="0 0 48 48" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M42.4379 44C42.4379 44 36.0744 33.9038 41.1692 24C46.8624 12.9336 42.2078 4 42.2078 4L7.01134 4C7.01134 4 11.6577 12.932 5.96912 23.9969C0.876273 33.9029 7.27094 44 7.27094 44L42.4379 44Z"></path>
+        </svg>
+      </div>
+      <div class="flex flex-col">
+        <h1 class="text-lg font-bold">Campus Lost &amp; Found</h1>
+        <p class="text-sm text-[#4c9a59]">Secure Messaging</p>
+      </div>
+    </div>
+
+    <!-- Item preview (optional) -->
+    <div id="itemPreview" class="mb-6">
+      <!-- If match page navigates here with selected item, show image + name -->
+    </div>
+
+    <h2 class="text-sm font-semibold text-[#0d1b10] mb-2">Registered Users</h2>
+    <div id="usersList" class="flex flex-col gap-2 overflow-y-auto pr-2" style="max-height:45vh;">
+      <!-- users injected here -->
+    </div>
+
+    <div class="mt-auto pt-4">
+      <button id="homeBtn" class="w-full rounded-lg h-11 bg-primary text-[#0d1b10] font-bold">Home</button>
+    </div>
+  </aside>
+
+  <!-- Chat area -->
+  <main class="flex-1 flex flex-col bg-[#f8fcf9]">
+    <!-- Chat header -->
+    <header class="flex items-center gap-4 px-6 py-4 border-b border-[#e7f3e9] bg-white">
+      <div id="activeAvatar" class="w-12 h-12 rounded-full bg-gray-300 avatar-letter text-lg"></div>
+      <div>
+        <div id="activeName" class="font-semibold">Select a user</div>
+        <div id="activeStatus" class="text-xs text-[#4c9a59]">Tap a name to start chat</div>
+      </div>
+      <div class="ml-auto flex items-center gap-2">
+        <button id="openItemMatches" class="text-sm text-[#0d1b10] px-3 py-1 rounded hover:bg-black/5">Matches</button>
+        <button id="viewProfileBtn" class="text-sm text-[#0d1b10] px-3 py-1 rounded hover:bg-black/5">Profile</button>
+      </div>
+    </header>
+
+    <!-- Messages -->
+    <div id="messagesArea" class="flex-1 overflow-y-auto p-6 flex flex-col gap-4">
+      <div id="emptyState" class="w-full text-center text-sm text-[#6b6b6b] mt-12">
+        <span class="material-symbols-outlined" style="font-size:48px;">chat</span>
+        <p class="mt-2">No conversation selected. Choose a user from the left to begin.</p>
+      </div>
+      <!-- messages will be appended here -->
+    </div>
+
+    <!-- Composer -->
+    <div class="p-4 border-t border-[#e7f3e9] bg-white">
+      <form id="composerForm" class="flex gap-3">
+        <input id="messageInput" class="flex-1 h-12 rounded-lg border border-[#e7f3e9] px-4 placeholder:text-[#9fbf98]" placeholder="Type a message..." autocomplete="off"/>
+        <button id="sendBtn" type="submit" class="h-12 px-4 rounded-lg bg-primary font-bold text-[#0d1b10]">Send</button>
+      </form>
+    </div>
+  </main>
+</div>
+
+<script>
+/*
+  Chat Page (single-file)
+  - Shows registered users from localStorage.users (array).
+  - currentUser expected in localStorage.currentUser. If missing, fallback to first user.
+  - Clicking a user opens conversation (keyed by sorted emails).
+  - Messages stored in localStorage.conversations as object: { "<key>": [ {from, to, text, time} ] }
+  - Avatar: generated from first letter + color.
+  - Home button => dashboard.html
+*/
+
+/* UTILITIES */
+function uidKey(a, b) {
+  // key for conversation: sorted emails joined
+  const list = [a||"", b||""].map(s => s.toLowerCase());
+  list.sort();
+  return list.join("::");
+}
+
+function timeNow() {
+  return new Date().toLocaleString();
+}
+
+function stringToColor(str) {
+  // deterministic pastel-ish color from string
+  let h = 0;
+  for (let i=0;i<str.length;i++) h = str.charCodeAt(i) + ((h<<5)-h);
+  const hue = Math.abs(h) % 360;
+  return `hsl(${hue} 60% 35%)`;
+}
+
+/* STORAGE */
+let users = JSON.parse(localStorage.getItem("users")) || []; // registered users
+let currentUser = JSON.parse(localStorage.getItem("currentUser")) || null;
+if (!currentUser) {
+  // fallback: if any users registered, set first as logged-in
+  if (users.length > 0) {
+    currentUser = users[0];
+    localStorage.setItem("currentUser", JSON.stringify(currentUser));
+  } else {
+    // create demo user so UI works
+    currentUser = { name: "Guest User", email: "guest@campus.local", role: "Student", userId: "guest-000" };
+    users.push(currentUser);
+    localStorage.setItem("users", JSON.stringify(users));
+    localStorage.setItem("currentUser", JSON.stringify(currentUser));
+  }
+}
+
+let conversations = JSON.parse(localStorage.getItem("conversations")) || {}; // { key: [messages] }
+
+/* UI refs */
+const usersList = document.getElementById("usersList");
+const messagesArea = document.getElementById("messagesArea");
+const activeName = document.getElementById("activeName");
+const activeStatus = document.getElementById("activeStatus");
+const activeAvatar = document.getElementById("activeAvatar");
+const emptyState = document.getElementById("emptyState");
+const composerForm = document.getElementById("composerForm");
+const messageInput = document.getElementById("messageInput");
+const homeBtn = document.getElementById("homeBtn");
+const itemPreview = document.getElementById("itemPreview");
+
+let activeChatWith = null; // email of other user
+
+/* Render users list (exclude currentUser from clickable list? show anyway but don't allow chat to self) */
+function renderUsers() {
+  usersList.innerHTML = "";
+  // show users in order: currentUser on top (label 'You'), then others
+  // ensure uniqueness by email
+  const seen = new Set();
+  users.forEach(u => {
+    if (!u || !u.email) return;
+    if (seen.has(u.email)) return;
+    seen.add(u.email);
+  });
+  // move currentUser first
+  const sorted = users.slice().sort((a,b) => (a.email === currentUser.email ? -1 : 0));
+  sorted.forEach(u => {
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = "flex items-center gap-3 w-full text-left p-2 rounded hover:bg-black/5";
+    // avatar circle
+    const ava = document.createElement("div");
+    ava.className = "w-10 h-10 rounded-full avatar-letter";
+    const initial = (u.name || u.email || "U").trim().charAt(0).toUpperCase();
+    ava.style.background = stringToColor(u.email || u.name || initial);
+    ava.textContent = initial;
+    ava.title = u.name || u.email;
+
+    const meta = document.createElement("div");
+    meta.className = "flex-1";
+    const title = document.createElement("div");
+    title.className = "font-medium truncate";
+    title.textContent = u.name || u.email;
+    const sub = document.createElement("div");
+    sub.className = "text-xs text-[#4c9a59]";
+    sub.textContent = (u.email === currentUser.email) ? "You" : (u.role || "Student");
+
+    meta.appendChild(title);
+    meta.appendChild(sub);
+
+    item.appendChild(ava);
+    item.appendChild(meta);
+
+    // On click: open chat with this user (if not self)
+    item.addEventListener("click", () => {
+      openConversation(u.email);
+    });
+
+    usersList.appendChild(item);
+  });
+}
+
+/* Render item preview if sessionStorage.itemPreview exists (match page may pass item) */
+function renderItemPreview() {
+  const ip = sessionStorage.getItem("itemPreview");
+  if (!ip) { itemPreview.innerHTML = ""; return; }
+  // ip is JSON string with { title, image, type, location, date }
+  try {
+    const o = JSON.parse(ip);
+    itemPreview.innerHTML = `
+      <div class="rounded-lg overflow-hidden border border-[#e7f3e9]">
+        <div class="w-full aspect-video bg-center bg-cover" style="background-image: url('${o.image||""}');"></div>
+        <div class="p-3">
+          <div class="font-medium">${o.title || "Reported item"}</div>
+          <div class="text-xs text-[#4c9a59]">${(o.type||"").toUpperCase()} • ${o.location||""}</div>
+        </div>
+      </div>
+    `;
+  } catch(e) {
+    itemPreview.innerHTML = "";
+  }
+}
+
+/* Open conversation with email */
+function openConversation(otherEmail) {
+  // find user
+  const other = users.find(u => u.email === otherEmail);
+  if (!other) {
+    alert("User not found");
+    return;
+  }
+  activeChatWith = otherEmail;
+  // set header
+  activeName.textContent = other.name || other.email;
+  activeStatus.textContent = other.email === currentUser.email ? "This is you" : "Active now";
+  activeAvatar.style.background = stringToColor(other.email);
+  activeAvatar.textContent = (other.name||other.email).trim().charAt(0).toUpperCase();
+
+  // load conversation
+  const key = uidKey(currentUser.email, otherEmail);
+  const convo = conversations[key] || [];
+
+  // clear area and render messages
+  messagesArea.innerHTML = "";
+  if (convo.length === 0) {
+    emptyState.style.display = "block";
+    const hint = document.createElement("div");
+    hint.className = "text-center text-sm text-[#6b6b6b] mt-6";
+    hint.textContent = "No messages yet. Say hi!";
+    messagesArea.appendChild(hint);
+  } else {
+    emptyState.style.display = "none";
+    convo.forEach(msg => appendMessageToDOM(msg));
+    // scroll to bottom
+    messagesArea.scrollTop = messagesArea.scrollHeight;
+  }
+}
+
+/* Append a single message object to DOM
+   msg: { from, to, text, time }
+*/
+function appendMessageToDOM(msg) {
+  // container
+  const wrapper = document.createElement("div");
+  wrapper.className = "flex";
+  const amISender = (msg.from && msg.from.toLowerCase()) === (currentUser.email||"").toLowerCase();
+  if (amISender) wrapper.classList.add("justify-end"); else wrapper.classList.add("justify-start");
+
+  const bubble = document.createElement("div");
+  bubble.className = "max-w-[72%] px-4 py-2 rounded-lg text-sm";
+  bubble.style.wordBreak = "break-word";
+  bubble.textContent = msg.text;
+
+  // bubble styling
+  if (amISender) {
+    bubble.classList.add("bubble-sent");
+    bubble.classList.add("text-[#0d1b10]");
+  } else {
+    bubble.classList.add("bubble-recv");
+    bubble.classList.add("text-[#0d1b10]");
+  }
+
+  // time small
+  const time = document.createElement("div");
+  time.className = "text-xs text-[#7b7b7b] mt-1";
+  time.textContent = msg.time || "";
+
+  const container = document.createElement("div");
+  container.className = "flex flex-col";
+  container.appendChild(bubble);
+  container.appendChild(time);
+
+  wrapper.appendChild(container);
+  messagesArea.appendChild(wrapper);
+  // keep scrolled to bottom
+  messagesArea.scrollTop = messagesArea.scrollHeight;
+}
+
+/* Send message handler */
+function sendMessageTo(activeWithEmail, text) {
+  if (!activeWithEmail) { alert("Select a user to message."); return; }
+  const key = uidKey(currentUser.email, activeWithEmail);
+  const msg = { from: currentUser.email, to: activeWithEmail, text: text.trim(), time: timeNow() };
+  conversations[key] = conversations[key] || [];
+  conversations[key].push(msg);
+  // save
+  localStorage.setItem("conversations", JSON.stringify(conversations));
+  // append UI
+  appendMessageToDOM(msg);
+}
+
+/* Composer submit */
+composerForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const txt = messageInput.value.trim();
+  if (!txt) return;
+  if (!activeChatWith) { alert("Choose a user from the left to chat."); return; }
+  sendMessageTo(activeChatWith, txt);
+  messageInput.value = "";
+});
+
+/* Home button */
+homeBtn.addEventListener("click", () => {
+  window.location.href = "dashboard.html";
+});
+
+/* Initialization */
+function initChatPage() {
+  // ensure users list is up-to-date (some pages may have registered users saved)
+  users = JSON.parse(localStorage.getItem("users")) || users;
+  // ensure currentUser is up-to-date
+  currentUser = JSON.parse(localStorage.getItem("currentUser")) || currentUser;
+  conversations = JSON.parse(localStorage.getItem("conversations")) || conversations;
+
+  renderItemPreview();
+  renderUsers();
+
+  // If sessionStorage.openChatWith present (match page may set this), open automatically
+  const preOpen = sessionStorage.getItem("openChatWith");
+  if (preOpen) {
+    sessionStorage.removeItem("openChatWith");
+    openConversation(preOpen);
+  } else {
+    // if there are conversations with current user, open last chatted
+    // find a key where currentUser.email in key and has messages; open with other
+    const keys = Object.keys(conversations || {});
+    let lastKey = null;
+    let lastTime = 0;
+    keys.forEach(k => {
+      if (!k.includes(currentUser.email.toLowerCase())) return;
+      const arr = conversations[k];
+      if (!arr || arr.length === 0) return;
+      const t = new Date(arr[arr.length-1].time).getTime() || (arr.length-1);
+      if (t > lastTime) { lastTime = t; lastKey = k; }
+    });
+    if (lastKey) {
+      // determine other email
+      const parts = lastKey.split("::");
+      const other = parts[0] === (currentUser.email||"").toLowerCase() ? parts[1] : parts[0];
+      openConversation(other);
+    }
+  }
+}
+
+/* Expose helper for other pages (e.g., viewposts) to open chat with specific user and optionally show item */
+window.openChatWith = function(email, itemObj) {
+  // save item preview for sidebar (optional)
+  if (itemObj) sessionStorage.setItem("itemPreview", JSON.stringify(itemObj));
+  sessionStorage.setItem("openChatWith", email);
+  // navigate (if different page) or just call openConversation
+  // If already on this page, open directly
+  if (location.pathname.endsWith("chat.html") || location.pathname.endsWith("index.html") || location.pathname.endsWith("/")) {
+    // on same page: set item preview and open
+    renderItemPreview();
+    openConversation(email);
+  } else {
+    // navigate to chat page
+    window.location.href = "chat.html";
+  }
+}
+
+/* initialize now */
+initChatPage();
+
+</script>
+</body>
+</html>

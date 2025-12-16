@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Findify — Admin Panel</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <style>
+    body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <div class="flex h-screen">
+    <!-- SIDEBAR -->
+    <aside class="w-64 border-r bg-white p-4">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="material-symbols-outlined text-green-500 text-3xl">track_changes</span>
+        <div>
+          <div class="font-bold">Findify Admin</div>
+          <div class="text-xs text-gray-500">Testing mode (open access)</div>
+        </div>
+      </div>
+
+      <nav class="flex flex-col gap-1">
+        <button id="navDashboard" class="text-left px-3 py-2 rounded bg-green-50">Dashboard</button>
+        <button id="navPosts" class="text-left px-3 py-2 rounded hover:bg-gray-100">Posts</button>
+        <button id="navFlagged" class="text-left px-3 py-2 rounded hover:bg-gray-100">Flagged Content</button>
+        <button id="navAnalytics" class="text-left px-3 py-2 rounded hover:bg-gray-100">Analytics</button>
+        <button id="navUsers" class="text-left px-3 py-2 rounded hover:bg-gray-100">Users (sample)</button>
+      </nav>
+
+      <div class="mt-auto text-sm text-gray-500 pt-6 border-t">
+        <div class="mb-2">Quick actions</div>
+        <button id="btnClearFlagged" class="px-3 py-2 rounded bg-red-50 text-red-600 text-sm">Clear all flagged</button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="flex-1 overflow-auto p-6">
+      <div id="pageDashboard">
+        <div class="flex justify-between items-center mb-6">
+          <h1 class="text-2xl font-bold">Admin Dashboard</h1>
+          <div class="flex gap-2">
+            <input id="globalSearch" class="border rounded px-3 py-2" placeholder="Search posts..." />
+            <button id="btnRefresh" class="px-3 py-2 bg-green-500 text-white rounded">Refresh</button>
+          </div>
+        </div>
+
+        <!-- small stats -->
+        <div class="grid grid-cols-4 gap-4 mb-8">
+          <div class="p-4 bg-white rounded shadow">
+            <div class="text-sm text-gray-500">Total Items Reported</div>
+            <div id="statTotal" class="text-xl font-bold">0</div>
+          </div>
+          <div class="p-4 bg-white rounded shadow">
+            <div class="text-sm text-gray-500">Items Matched</div>
+            <div id="statMatched" class="text-xl font-bold">0</div>
+          </div>
+          <div class="p-4 bg-white rounded shadow">
+            <div class="text-sm text-gray-500">Items Recovered</div>
+            <div id="statRecovered" class="text-xl font-bold">0</div>
+          </div>
+          <div class="p-4 bg-white rounded shadow">
+            <div class="text-sm text-gray-500">Pending Approval</div>
+            <div id="statPending" class="text-xl font-bold">0</div>
+          </div>
+        </div>
+
+        <h2 class="text-lg font-semibold mb-2">Recent posts</h2>
+        <div id="recentPostsContainer" class="bg-white rounded shadow overflow-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 text-left">Item</th>
+                <th class="p-3">Type</th>
+                <th class="p-3">Posted By</th>
+                <th class="p-3">Date</th>
+                <th class="p-3">Status</th>
+                <th class="p-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="recentPostsTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- POSTS PAGE -->
+      <div id="pagePosts" class="hidden">
+        <div class="flex items-center justify-between mb-4">
+          <h1 class="text-2xl font-bold">All User-Submitted Posts</h1>
+          <div class="flex gap-2">
+            <select id="filterType" class="border rounded px-2 py-1">
+              <option value="">All types</option>
+              <option value="LOST">LOST</option>
+              <option value="FOUND">FOUND</option>
+            </select>
+            <input id="postsSearch" class="border rounded px-3 py-2" placeholder="Search..." />
+            <button id="btnExport" class="px-3 py-2 bg-gray-100 rounded">Export JSON</button>
+          </div>
+        </div>
+
+        <div class="bg-white rounded shadow overflow-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 text-left">Item</th>
+                <th class="p-3">Type</th>
+                <th class="p-3">Category</th>
+                <th class="p-3">Posted By</th>
+                <th class="p-3">Date</th>
+                <th class="p-3">Status</th>
+                <th class="p-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="postsTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- FLAGGED PAGE -->
+      <div id="pageFlagged" class="hidden">
+        <div class="flex items-center justify-between mb-4">
+          <h1 class="text-2xl font-bold">Flagged Content Moderation</h1>
+          <div>
+            <button id="btnExportFlagged" class="px-3 py-2 bg-gray-100 rounded">Export flagged</button>
+          </div>
+        </div>
+
+        <div class="bg-white rounded shadow overflow-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 text-left">Item</th>
+                <th class="p-3">Reported By</th>
+                <th class="p-3">Reason</th>
+                <th class="p-3">Date</th>
+                <th class="p-3">Status</th>
+                <th class="p-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="flaggedTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ANALYTICS -->
+      <div id="pageAnalytics" class="hidden">
+        <h1 class="text-2xl font-bold mb-4">Reporting Dashboard (Analytics)</h1>
+
+        <div class="grid grid-cols-3 gap-4 mb-6">
+          <div class="bg-white p-4 rounded shadow">
+            <div class="text-sm text-gray-500">Total Reports</div>
+            <div id="analyticsTotal" class="text-2xl font-bold">0</div>
+          </div>
+          <div class="bg-white p-4 rounded shadow">
+            <div class="text-sm text-gray-500">Pending</div>
+            <div id="analyticsPending" class="text-2xl font-bold">0</div>
+          </div>
+          <div class="bg-white p-4 rounded shadow">
+            <div class="text-sm text-gray-500">Flagged (unique posts)</div>
+            <div id="analyticsFlaggedUnique" class="text-2xl font-bold">0</div>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 rounded shadow">
+          <div class="text-sm text-gray-600 mb-2">Filter by category / date (demo)</div>
+          <div class="flex gap-2">
+            <select id="analyticsCategory" class="border rounded px-2 py-1">
+              <option value="">All categories</option>
+            </select>
+            <input id="analyticsFrom" type="date" class="border rounded px-2 py-1" />
+            <input id="analyticsTo" type="date" class="border rounded px-2 py-1" />
+            <button id="btnRunAnalytics" class="px-3 py-2 bg-green-500 text-white rounded">Run</button>
+          </div>
+          <div id="analyticsResults" class="mt-4 text-sm text-gray-700">Use "Run" to filter demo stats.</div>
+        </div>
+      </div>
+
+      <!-- USERS (sample) -->
+      <div id="pageUsers" class="hidden">
+        <h1 class="text-2xl font-bold mb-4">Users (sample)</h1>
+        <div class="bg-white rounded shadow p-4">
+          <p class="text-sm text-gray-600">This panel lists sample users stored under <code>localStorage.users</code>. (Testing only)</p>
+          <pre id="usersJson" class="mt-3 p-3 bg-gray-50 rounded text-xs"></pre>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- EDIT POST MODAL -->
+  <div id="modalEdit" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div class="bg-white rounded w-[720px] p-6">
+      <h2 class="font-bold text-lg mb-3">Edit Post</h2>
+      <div class="grid grid-cols-2 gap-3">
+        <input id="edit_itemName" class="border p-2 rounded col-span-2" placeholder="Item name" />
+        <input id="edit_user" class="border p-2 rounded" placeholder="Posted by (email/name)" />
+        <select id="edit_type" class="border p-2 rounded">
+          <option value="LOST">LOST</option>
+          <option value="FOUND">FOUND</option>
+        </select>
+        <input id="edit_date" type="date" class="border p-2 rounded" />
+        <input id="edit_category" class="border p-2 rounded" placeholder="Category" />
+        <input id="edit_location" class="border p-2 rounded" placeholder="Location" />
+        <textarea id="edit_description" class="border p-2 rounded col-span-2" rows="4" placeholder="Description"></textarea>
+      </div>
+      <div class="mt-4 flex justify-end gap-2">
+        <button id="btnCancelEdit" class="px-3 py-2 rounded border">Cancel</button>
+        <button id="btnSaveEdit" class="px-3 py-2 rounded bg-green-500 text-white">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW POST MODAL -->
+  <div id="modalView" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div class="bg-white rounded w-[720px] p-6">
+      <div class="flex justify-between items-start">
+        <h2 id="view_title" class="font-bold text-lg"></h2>
+        <button id="closeView">✕</button>
+      </div>
+      <div id="view_body" class="mt-3 text-sm text-gray-700"></div>
+      <div class="mt-4 text-right">
+        <button id="closeView2" class="px-3 py-2 rounded border">Close</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ============================
+   Admin panel script (single file)
+   - Data in localStorage.posts (array)
+   - Flagged in localStorage.flaggedPosts (array)
+   - Users (optional) in localStorage.users
+   ============================ */
+
+/* ---------- Utilities ---------- */
+function loadJSON(key) {
+  try { return JSON.parse(localStorage.getItem(key)) || []; } catch(e) { return []; }
+}
+function saveJSON(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+function ensureDemoData() {
+  let posts = loadJSON('posts');
+  if (!posts || posts.length === 0) {
+    posts = [
+      { itemName: 'Black Leather Wallet', description:'Near cafe counter', date:'2024-10-28', location:'Cafeteria', category:'Wallets', zone:'Cafeteria', image:'', user:'james@example.com', type:'LOST', status:'approved', time: new Date().toISOString() },
+      { itemName: 'University Hoodie', description:'Blue hoodie with logo', date:'2024-10-27', location:'Gym', category:'Clothes', zone:'Gym', image:'', user:'emily@example.com', type:'FOUND', status:'pending', time: new Date(Date.now()-86400000).toISOString() },
+      { itemName: 'Set of Keys', description:'Bunch of keys with red fob', date:'2024-10-26', location:'Library', category:'Keys', zone:'Library', image:'', user:'michael@example.com', type:'LOST', status:'approved', time: new Date(Date.now()-2*86400000).toISOString() }
+    ];
+    saveJSON('posts', posts);
+  }
+  let flagged = loadJSON('flaggedPosts');
+  if (!flagged || flagged.length === 0) {
+    flagged = [
+      { postId: posts[1].time, itemName: posts[1].itemName, reportedBy:'olivia@example.com', reason:'Inappropriate language', date: new Date().toISOString(), status:'pending' }
+    ];
+    saveJSON('flaggedPosts', flagged);
+  }
+  let users = loadJSON('users');
+  if (!users || users.length === 0) {
+    users = [
+      { name:'Alex Admin', email:'admin@example.com', role:'admin' },
+      { name:'James Smith', email:'james@example.com', role:'user' }
+    ];
+    saveJSON('users', users);
+  }
+}
+
+/* ---------- Page switching ---------- */
+const pages = ['pageDashboard','pagePosts','pageFlagged','pageAnalytics','pageUsers'];
+function showPage(id) {
+  pages.forEach(p => document.getElementById(p).classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
+document.getElementById('navDashboard').addEventListener('click', ()=> showPage('pageDashboard'));
+document.getElementById('navPosts').addEventListener('click', ()=> showPage('pagePosts'));
+document.getElementById('navFlagged').addEventListener('click', ()=> showPage('pageFlagged'));
+document.getElementById('navAnalytics').addEventListener('click', ()=> showPage('pageAnalytics'));
+document.getElementById('navUsers').addEventListener('click', ()=> showPage('pageUsers'));
+
+/* ---------- Render functions ---------- */
+function renderStats() {
+  const posts = loadJSON('posts');
+  const flagged = loadJSON('flaggedPosts');
+  const total = posts.length;
+  const matched = posts.filter(p => p.matched).length || 0;
+  const recovered = posts.filter(p => p.recovered).length || 0;
+  const pending = posts.filter(p => p.status === 'pending' || !p.status).length;
+
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statMatched').textContent = matched;
+  document.getElementById('statRecovered').textContent = recovered;
+  document.getElementById('statPending').textContent = pending;
+
+  // dashboard recent posts table
+  const recentTbody = document.getElementById('recentPostsTbody');
+  recentTbody.innerHTML = '';
+  posts.slice().reverse().slice(0,8).forEach((p, idx) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="p-3">${escapeHtml(p.itemName)}</td>
+      <td class="p-3 text-center">${escapeHtml(p.type||'')}</td>
+      <td class="p-3 text-center">${escapeHtml(p.user||'')}</td>
+      <td class="p-3 text-center">${(p.date||'').slice(0,10)}</td>
+      <td class="p-3 text-center">${statusBadge(p.status)}</td>
+      <td class="p-3 text-right">
+        <button class="px-2 py-1 mr-2 text-sm btnView inline-block" data-id="${p.time}">View</button>
+        <button class="px-2 py-1 mr-2 text-sm btnApprove inline-block" data-id="${p.time}">Approve</button>
+      </td>
+    `;
+    recentTbody.appendChild(tr);
+  });
+}
+
+function statusBadge(status) {
+  if (!status || status === 'pending') return `<span class="px-2 py-0.5 rounded text-xs bg-yellow-100">Pending</span>`;
+  if (status === 'approved') return `<span class="px-2 py-0.5 rounded text-xs bg-green-100">Approved</span>`;
+  if (status === 'removed') return `<span class="px-2 py-0.5 rounded text-xs bg-red-100">Removed</span>`;
+  return `<span class="px-2 py-0.5 rounded text-xs bg-gray-100">${escapeHtml(status)}</span>`;
+}
+
+function renderPostsTable(filter='') {
+  const posts = loadJSON('posts');
+  const tbody = document.getElementById('postsTbody');
+  const q = (document.getElementById('postsSearch')?.value || '').toLowerCase();
+  tbody.innerHTML = '';
+  posts.forEach((p, idx) => {
+    if (filter && p.type !== filter) return;
+    if (q) {
+      const hay = `${p.itemName} ${p.description} ${p.user} ${p.category}`.toLowerCase();
+      if (!hay.includes(q)) return;
+    }
+    const tr = document.createElement('tr');
+    tr.className = 'border-t';
+    tr.innerHTML = `
+      <td class="p-3">${escapeHtml(p.itemName)}</td>
+      <td class="p-3 text-center">${escapeHtml(p.type)}</td>
+      <td class="p-3 text-center">${escapeHtml(p.category||'')}</td>
+      <td class="p-3 text-center">${escapeHtml(p.user||'')}</td>
+      <td class="p-3 text-center">${(p.date||'').slice(0,10)}</td>
+      <td class="p-3 text-center">${statusBadge(p.status)}</td>
+      <td class="p-3 text-right">
+        <button class="px-2 py-1 btnView text-sm" data-id="${p.time}">View</button>
+        ${p.status !== 'approved' ? `<button class="px-2 py-1 btnApprove text-sm" data-id="${p.time}">Approve</button>` : ''}
+        <button class="px-2 py-1 btnEdit text-sm" data-idx="${idx}">Edit</button>
+        <button class="px-2 py-1 btnDelete text-sm text-red-600" data-idx="${idx}">Delete</button>
+        <button class="px-2 py-1 btnReport text-sm text-yellow-600" data-id="${p.time}">Report</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // attach events (delegation could be used; simple rebind here)
+  document.querySelectorAll('.btnApprove').forEach(b => b.addEventListener('click', e => {
+    const id = e.currentTarget.dataset.id;
+    approvePostById(id);
+  }));
+  document.querySelectorAll('.btnEdit').forEach(b => b.addEventListener('click', e => {
+    const idx = Number(e.currentTarget.dataset.idx);
+    openEditModal(idx);
+  }));
+  document.querySelectorAll('.btnDelete').forEach(b => b.addEventListener('click', e => {
+    const idx = Number(e.currentTarget.dataset.idx);
+    deletePost(idx);
+  }));
+  document.querySelectorAll('.btnView').forEach(b => b.addEventListener('click', e => {
+    const id = e.currentTarget.dataset.id;
+    openViewModalById(id);
+  }));
+  document.querySelectorAll('.btnReport').forEach(b => b.addEventListener('click', e => {
+    const id = e.currentTarget.dataset.id;
+    quickReport(id);
+  }));
+}
+
+function renderFlaggedTable() {
+  const flagged = loadJSON('flaggedPosts');
+  const tbody = document.getElementById('flaggedTbody');
+  tbody.innerHTML = '';
+  flagged.forEach((f, idx) => {
+    const tr = document.createElement('tr');
+    tr.className = 'border-t';
+    tr.innerHTML = `
+      <td class="p-3">${escapeHtml(f.itemName)}</td>
+      <td class="p-3">${escapeHtml(f.reportedBy)}</td>
+      <td class="p-3">${escapeHtml(f.reason)}</td>
+      <td class="p-3">${(f.date||'').slice(0,10)}</td>
+      <td class="p-3 text-center">${f.status === 'pending' ? '<span class="px-2 py-0.5 rounded text-xs bg-yellow-100">Needs Review</span>' : '<span class="px-2 py-0.5 rounded text-xs bg-green-100">Handled</span>'}</td>
+      <td class="p-3 text-right">
+        <button class="px-2 py-1 btnViewPost text-sm" data-postid="${escapeHtml(f.postId)}">View Post</button>
+        <button class="px-2 py-1 btnDismiss text-sm text-green-600" data-idx="${idx}">Dismiss Flag</button>
+        <button class="px-2 py-1 btnRemove text-sm text-red-600" data-idx="${idx}">Remove Post</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.querySelectorAll('.btnDismiss').forEach(b => b.addEventListener('click', e => {
+    const i = Number(e.currentTarget.dataset.idx);
+    dismissFlag(i);
+  }));
+  document.querySelectorAll('.btnRemove').forEach(b => b.addEventListener('click', e => {
+    const i = Number(e.currentTarget.dataset.idx);
+    removePostFromFlag(i);
+  }));
+  document.querySelectorAll('.btnViewPost').forEach(b => b.addEventListener('click', e => {
+    const postId = e.currentTarget.dataset.postid;
+    openViewModalById(postId);
+  }));
+}
+
+function renderAnalytics() {
+  const flagged = loadJSON('flaggedPosts');
+  document.getElementById('analyticsTotal').textContent = flagged.length;
+  document.getElementById('analyticsPending').textContent = flagged.filter(f=>f.status==='pending').length;
+  const unique = new Set(flagged.map(f=>f.postId)).size;
+  document.getElementById('analyticsFlaggedUnique').textContent = unique;
+}
+
+function renderUsers() {
+  const users = loadJSON('users');
+  document.getElementById('usersJson').textContent = JSON.stringify(users, null, 2);
+}
+
+/* ---------- Actions ---------- */
+function approvePostById(id) {
+  const posts = loadJSON('posts');
+  const i = posts.findIndex(p => p.time === id);
+  if (i >= 0) {
+    posts[i].status = 'approved';
+    saveJSON('posts', posts);
+    refreshAll();
+    alert('Post approved.');
+  } else alert('Post not found.');
+}
+
+function openEditModal(idx) {
+  const posts = loadJSON('posts');
+  const p = posts[idx];
+  if (!p) return alert('Post not found');
+  document.getElementById('edit_itemName').value = p.itemName || '';
+  document.getElementById('edit_user').value = p.user || '';
+  document.getElementById('edit_type').value = p.type || 'LOST';
+  document.getElementById('edit_date').value = (p.date||'').slice(0,10);
+  document.getElementById('edit_category').value = p.category || '';
+  document.getElementById('edit_location').value = p.location || '';
+  document.getElementById('edit_description').value = p.description || '';
+  document.getElementById('modalEdit').dataset.editIdx = idx;
+  document.getElementById('modalEdit').classList.remove('hidden');
+}
+
+document.getElementById('btnCancelEdit').addEventListener('click', ()=> {
+  document.getElementById('modalEdit').classList.add('hidden');
+});
+document.getElementById('btnSaveEdit').addEventListener('click', ()=> {
+  const idx = Number(document.getElementById('modalEdit').dataset.editIdx);
+  const posts = loadJSON('posts');
+  const p = posts[idx];
+  if (!p) return alert('Post not found');
+  p.itemName = document.getElementById('edit_itemName').value.trim();
+  p.user = document.getElementById('edit_user').value.trim();
+  p.type = document.getElementById('edit_type').value;
+  p.date = document.getElementById('edit_date').value || p.date;
+  p.category = document.getElementById('edit_category').value.trim();
+  p.location = document.getElementById('edit_location').value.trim();
+  p.description = document.getElementById('edit_description').value.trim();
+  saveJSON('posts', posts);
+  document.getElementById('modalEdit').classList.add('hidden');
+  refreshAll();
+});
+
+function deletePost(idx) {
+  if (!confirm('Delete this post?')) return;
+  const posts = loadJSON('posts');
+  const removed = posts.splice(idx,1);
+  saveJSON('posts', posts);
+  // Also remove flagged references to this post
+  let flagged = loadJSON('flaggedPosts');
+  flagged = flagged.filter(f => f.postId !== (removed[0]?.time));
+  saveJSON('flaggedPosts', flagged);
+  refreshAll();
+}
+
+function openViewModalById(id) {
+  const posts = loadJSON('posts');
+  const p = posts.find(pp => pp.time === id);
+  if (!p) return alert('Post not found');
+  document.getElementById('view_title').textContent = p.itemName;
+  document.getElementById('view_body').innerHTML = `
+    <div class="grid grid-cols-2 gap-3">
+      <div><strong>Type:</strong> ${escapeHtml(p.type)}</div>
+      <div><strong>Posted by:</strong> ${escapeHtml(p.user)}</div>
+      <div><strong>Date:</strong> ${(p.date||'').slice(0,10)}</div>
+      <div><strong>Location:</strong> ${escapeHtml(p.location||'')}</div>
+      <div class="col-span-2"><strong>Category:</strong> ${escapeHtml(p.category||'')}</div>
+      <div class="col-span-2"><strong>Description:</strong><p class="mt-2">${escapeHtml(p.description||'')}</p></div>
+    </div>
+  `;
+  document.getElementById('modalView').classList.remove('hidden');
+}
+document.getElementById('closeView').addEventListener('click', ()=> document.getElementById('modalView').classList.add('hidden'));
+document.getElementById('closeView2').addEventListener('click', ()=> document.getElementById('modalView').classList.add('hidden'));
+
+function quickReport(postId) {
+  const reason = prompt('Report reason (short):', 'Suspicious / offensive / duplicate');
+  if (!reason) return;
+  const posts = loadJSON('posts');
+  const p = posts.find(pp => pp.time === postId);
+  if (!p) return alert('Original post not found');
+  const flagged = loadJSON('flaggedPosts');
+  flagged.push({ postId: p.time, itemName: p.itemName, reportedBy: 'anonymous', reason: reason, date: new Date().toISOString(), status: 'pending' });
+  saveJSON('flaggedPosts', flagged);
+  alert('Reported — admin will review.');
+  refreshAll();
+}
+
+function dismissFlag(index) {
+  const flagged = loadJSON('flaggedPosts');
+  if (!flagged[index]) return;
+  flagged[index].status = 'handled';
+  saveJSON('flaggedPosts', flagged);
+  refreshAll();
+}
+function removePostFromFlag(index) {
+  const flagged = loadJSON('flaggedPosts');
+  const f = flagged[index];
+  if (!f) return;
+  // remove post permanently
+  let posts = loadJSON('posts');
+  posts = posts.filter(p => p.time !== f.postId);
+  saveJSON('posts', posts);
+  // remove flagged entry
+  flagged.splice(index,1);
+  saveJSON('flaggedPosts', flagged);
+  refreshAll();
+}
+
+/* ---------- helpers ---------- */
+function escapeHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
+
+/* ---------- Refresh everything ---------- */
+function refreshAll() {
+  renderStats();
+  renderPostsTable(document.getElementById('filterType')?.value || '');
+  renderFlaggedTable();
+  renderAnalytics();
+  renderUsers();
+  populateAnalyticsCategories();
+}
+
+/* ---------- Export utilities ---------- */
+document.getElementById('btnExport').addEventListener('click', ()=> {
+  const posts = loadJSON('posts');
+  const blob = new Blob([JSON.stringify(posts, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'posts.json'; a.click();
+  URL.revokeObjectURL(url);
+});
+document.getElementById('btnExportFlagged').addEventListener('click', ()=> {
+  const flagged = loadJSON('flaggedPosts');
+  const blob = new Blob([JSON.stringify(flagged, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'flagged.json'; a.click();
+  URL.revokeObjectURL(url);
+});
+document.getElementById('btnClearFlagged').addEventListener('click', ()=> {
+  if (!confirm('Clear all flagged reports?')) return;
+  saveJSON('flaggedPosts', []);
+  refreshAll();
+});
+
+/* ---------- small UI bindings ---------- */
+document.getElementById('postsSearch').addEventListener('input', ()=> refreshAll());
+document.getElementById('filterType').addEventListener('change', ()=> refreshAll());
+document.getElementById('btnRefresh').addEventListener('click', ()=> refreshAll());
+document.getElementById('globalSearch').addEventListener('input', (e)=> {
+  // quick highlight: search in posts page and dashboard recent
+  document.getElementById('postsSearch').value = e.target.value;
+  refreshAll();
+});
+
+/* ---------- analytics helpers ---------- */
+function populateAnalyticsCategories() {
+  const posts = loadJSON('posts');
+  const set = new Set(posts.map(p=>p.category).filter(Boolean));
+  const sel = document.getElementById('analyticsCategory');
+  sel.innerHTML = '<option value="">All categories</option>';
+  set.forEach(c => sel.insertAdjacentHTML('beforeend', `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`));
+}
+document.getElementById('btnRunAnalytics').addEventListener('click', ()=> {
+  const from = document.getElementById('analyticsFrom').value;
+  const to = document.getElementById('analyticsTo').value;
+  const category = document.getElementById('analyticsCategory').value;
+  const posts = loadJSON('posts').filter(p => {
+    if (category && p.category !== category) return false;
+    if (from && (p.date||'') < from) return false;
+    if (to && (p.date||'') > to) return false;
+    return true;
+  });
+  document.getElementById('analyticsResults').textContent = `Posts: ${posts.length} — Approved: ${posts.filter(p=>p.status==='approved').length}, Pending: ${posts.filter(p=>p.status==='pending' || !p.status).length}`;
+});
+
+/* ---------- on load ---------- */
+ensureDemoData();
+refreshAll();
+
+</script>
+</body>
+</html>

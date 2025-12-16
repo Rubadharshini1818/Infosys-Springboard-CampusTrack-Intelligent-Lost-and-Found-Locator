@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Campus Lost&Found Locator</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#22c55e",
+          "primary-hover": "#16a34a",
+          "background-light": "#f0fdf4",
+          "background-dark": "#141E1A",
+        },
+        fontFamily: {
+          "display": ["Inter", "sans-serif"]
+        },
+        borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+      },
+    },
+  }
+</script>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200">
+
+<div class="relative flex min-h-screen w-full flex-col bg-cover bg-center"
+style='background-image: linear-gradient(rgba(16, 47, 33, 0.4) 0%, rgba(10, 29, 20, 0.6) 100%),
+url("https://lh3.googleusercontent.com/aida-public/AB6AXuByBsq9bwpcgx447YzFsUloN3bbzdl7vuV8xo9n3VUQq3eBjv1CluUB0bNzxses2NZos_rzBU45z6dRxl4Tyvk57n2ati6LjPVQ-kmqkcB14xsjCYO3Gdgn6QjZ9BgaEEMh-_pdi5x6hjB3z91F8vXyte-bC1xq3cotRoo3xJ54PUgDNkjJ4t8IZjH2zONdgjKHCKoNlWYKC8DBqUjC9hwkUkxNGk14jrAJFSpS54L6Zzkf5WcIDr-aHgcze1i1IQwnI46vE7xkKVA");'>
+
+<!-- HEADER -->
+<header class="absolute top-0 left-0 right-0 z-10 p-4 sm:p-6 md:p-8">
+  <div class="mx-auto flex max-w-7xl items-center justify-between">
+    <h1 class="text-xl font-bold text-white">Campus Lost&Found Locator</h1>
+
+    <!-- LOGIN BUTTON -->
+    <button onclick="window.location.href='login.html'"
+      class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-white/20 text-white backdrop-blur-sm text-sm font-bold leading-normal transition-colors hover:bg-white/30">
+      <span class="truncate">Login</span>
+    </button>
+  </div>
+</header>
+
+<!-- MAIN SECTION -->
+<main class="flex flex-1 flex-col items-center justify-center p-4 text-center">
+  <div class="flex flex-col items-center gap-6">
+
+    <h2 class="text-4xl font-black text-white drop-shadow-lg sm:text-5xl md:text-6xl">
+      Find What's Lost.
+    </h2>
+
+    <p class="max-w-xl text-lg text-white/90 drop-shadow-sm">
+      The simple way to report and find lost items on campus.
+    </p>
+
+    <!-- GET STARTED BUTTON -->
+    <button onclick="window.location.href='register.html'"
+      class="mt-4 flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-white text-base font-bold leading-normal tracking-wide transition-colors hover:bg-primary-hover">
+      <span class="truncate">Get Started</span>
+    </button>
+
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="p-4 sm:p-6 md:p-8">
+  <div class="mx-auto max-w-7xl text-center">
+    <p class="text-sm text-white/60">© 2024 Campus Lost&Found Locator</p>
+  </div>
+</footer>
+
+</div>
+</body>
+</html>
