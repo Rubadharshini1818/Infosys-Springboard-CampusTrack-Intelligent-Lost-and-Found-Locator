@@ -8,7 +8,9 @@ It provides real-time tracking, notifications, and an organized dashboard for sm
 📅 Event and Announcement Management
 📍 Real-Time Tracking System
 🧾 Admin Panel for Data Management
+
 🧠 Tech Stack
 Frontend: HTML, CSS (Tailwind), JavaScript
+
 💡 About
 This project is developed as part of a campus management system to enhance communication, transparency, and efficiency across the institution.
